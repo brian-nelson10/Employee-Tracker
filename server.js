@@ -106,6 +106,62 @@ function viewAllDepartments() {
             });
         }
 
+function addEmployee() {
+    let sql = `SELECT roles.id, roles.title, roles.salary FROM roles`
+
+        connection.query(sql,(err, res) => {
+            if (err) throw err;
+                const roles = res.map(({id, title, salary }) => ({
+                    value: id,
+                    title: `${title}`,
+                    salary: `${salary}`
+                }));
+                console.log('Adding Employee!');
+                console.table(res);
+                enterEmployee(roles);
+        });
+}
+
+function enterEmployee(roles) {
+    inquirer.prompt([ 
+        {
+            type: 'input',
+            name: 'firstName',
+            message: 'Enter Employees First Name: '
+        },
+        {
+            type: 'input',
+            name: 'lastName',
+            message: 'Enter Employees Last Name: '
+        },
+        {
+            type: 'confirm',
+            name: 'isManager',
+            message: 'Is Employee a Manager?',
+            default: false
+        },
+        {
+            type: 'list',
+            name: 'roleId',
+            message: 'Choose Employee Role',
+            choices: roles
+        }
+
+    ]).then((res) => {
+        let sql = `INSERT INTO employee SET ?`
+        connection.query(sql,{
+            first_name: res.firstName,
+            last_name: res.lastName,
+            roles_id: res.roleId,
+            is_manager: res.isManager
+        }, (err, res) => {
+            if (err) throw err;
+            console.log('Employee Added!');
+            optionsPrompt();
+        });
+    });
+}
+
 function exit() {
         process.exit();
     }
