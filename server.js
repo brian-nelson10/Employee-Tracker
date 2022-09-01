@@ -18,8 +18,8 @@
 
 const express = require('express');
 const inquirer = require('inquirer');
-const db = require('./db/connection');
-const apiRoutes = require('./routes/apiRoutes');
+const connection = require('./db/connection');
+//const apiRoutes = require('./routes/apiRoutes');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -47,22 +47,77 @@ const optionsPrompt = () => {
             type: 'list',
             name: 'options',
             message: 'What Would You Like To Do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit']
         }
     ])
     .then((res) => {
         console.log(res.options);
+        switch(res.options){
+            case 'View All Employees':
+                viewAllEmployees();
+                break;
+            case 'Add Employee':
+                addEmployee();
+                break;
+            case 'Update Employee Role':
+                updateEmployeeRole();
+                break;
+            case 'View All Roles':
+                viewAllRoles();
+                break;
+            case 'Add Role':
+                addRole();
+                break;
+            case 'View All Departments':
+                viewAllDepartments();
+                break;
+            case 'Add Department':
+                addDepartment();
+                break;
+            case 'Exit':
+                exit();
+                break;
+            }
+        }).catch((err) => {
+            if(err)throw err;
+        });
+    };
 
-    });
-};
+function viewAllEmployees() {
+    let sql = `SELECT * FROM employee ORDER BY last_name`;
+
+        connection.query(sql, (err, res) => {
+            if (err) throw err;
+                console.table(res);
+                console.log('All Employees!');
+                optionsPrompt();
+        })
+    }
+
+function viewAllDepartments() {
+    let sql = `SELECT * FROM departments ORDER BY department_name`;
+    
+        connection.query(sql, (err, res) => {
+            if (err) throw err; 
+                console.table(res);
+                console.log('All Departments!');
+               optionsPrompt();
+           
+            });
+        }
+
+function exit() {
+        process.exit();
+    }
 
 optionsPrompt();
 
 // Start server after DB connection
-db.connect(err => {
+connection.connect(err => {
   if (err) throw err;
   console.log('Database connected.');
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 });
+
