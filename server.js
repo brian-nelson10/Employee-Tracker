@@ -91,7 +91,7 @@ function viewAllEmployees() {
                 console.table(res);
                 console.log('All Employees!');
                 optionsPrompt();
-        })
+        });
     }
 
 function viewAllDepartments() {
@@ -101,10 +101,20 @@ function viewAllDepartments() {
             if (err) throw err; 
                 console.table(res);
                 console.log('All Departments!');
-               optionsPrompt();
-           
+                optionsPrompt();
             });
         }
+
+function viewAllRoles() {
+    let sql = `SELECT * FROM roles ORDER BY salary DESC`;
+    
+        connection.query(sql, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            console.log('All Roles!');
+            optionsPrompt();
+        });
+}
 
 function addEmployee() {
     let sql = `SELECT roles.id, roles.title, roles.salary FROM roles`
@@ -156,7 +166,7 @@ function enterEmployee(roles) {
             is_manager: res.isManager
         }, (err, res) => {
             if (err) throw err;
-            console.log('Employee Added!');
+            console.log('Employee Added! See View All Employees!');
             optionsPrompt();
         });
     });

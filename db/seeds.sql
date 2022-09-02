@@ -2,7 +2,12 @@ USE employeetracker_db;
 
 INSERT INTO departments (department_name)
 VALUES
-('HR'), ('Customer Service'), ('Management'), ('Hourly'), ('Payroll'), ('Training');
+('HR'), 
+('Customer Service'), 
+('Management'), 
+('Hourly'), 
+('Payroll'), 
+('Training');
 
 INSERT INTO employee (first_name, last_name, roles_id, is_manager)
 VALUES
@@ -25,4 +30,4 @@ VALUES
   ("Customer Service Desk", 120000, 2), 
   ("Accountant", 122000, 5), 
   ("General Manager", 250000, 3), 
-  ("Coach", 190000, 6);
+  ("Coach", 1750000, 6);
