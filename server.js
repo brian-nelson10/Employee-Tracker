@@ -19,17 +19,9 @@
 const express = require('express');
 const inquirer = require('inquirer');
 const connection = require('./db/connection');
-//const apiRoutes = require('./routes/apiRoutes');
+require('console.table');
 
-const PORT = process.env.PORT || 3001;
 const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
-// Use apiRoutes
-//app.use('/api', apiRoutes);
 
 // Default response for any other request (Not Found)
 app.use((req, res) => {
@@ -47,7 +39,7 @@ const optionsPrompt = () => {
             type: 'list',
             name: 'options',
             message: 'What Would You Like To Do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Exit']
+            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'Delete Employee', 'View All Roles', 'Add Role', 'Delete Role', 'View All Departments', 'Add Department', 'Delete Department', 'Exit']
         }
     ])
     .then((res) => {
@@ -71,11 +63,17 @@ const optionsPrompt = () => {
             case 'Add Role':
                 addRole();
                 break;
+            case 'Delete Role':
+                deleteRole();
+                break;
             case 'View All Departments':
                 viewAllDepartments();
                 break;
             case 'Add Department':
                 addDepartment();
+                break;
+            case 'Delete Department':
+                deleteDepartment();
                 break;
             case 'Exit':
                 exit();
@@ -176,11 +174,8 @@ const enterEmployee = (roles) => {
 }
 
 const updateEmployeeRole = () => {
-    let sql = `SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, departments.department_name,
-        CONCAT(manager.first_name, '', manager.last_name) AS manager FROM employee
-        JOIN roles ON employee.roles_id = roles.id
-        JOIN departments ON departments.id = roles.departments_id
-        JOIN employee manager ON manager.id = employee.manager_id`
+    let sql = `SELECT employee.id, employee.first_name, employee.last_name, roles.id FROM employee
+        JOIN roles ON employee.roles_id = roles.id`
 
     connection.query(sql, (err, res) => {
         if (err) throw err;
@@ -213,7 +208,7 @@ const updatedRole = (employee, roleOptions) => {
         {
             type: 'list',
             name: 'employee',
-            message: 'Select Employee who role will be Updated: ',
+            message: 'Select Employee who`s role will be Updated: ',
             choices: employee
         },
         {
@@ -264,17 +259,46 @@ const addDelete = (employee) => {
     });
 }
 
+const deleteRole = () => {
+    let sql = `SELECT roles.id, roles.title, roles.departments_id FROM roles`
+    connection.query(sql,(err, res) => {
+        if (err) throw err;
+        const roles = res.map(({ id, title, departments_id }) => ({
+            value: id,
+            name: `${id} ${title} ${departments_id}`
+        }));
+        console.table(res);
+        rolesDelete(roles);
+    });
+}
+
+const rolesDelete = (roles) => {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'roles',
+            message: 'Select Role to be Deleted: ',
+            choices: roles
+        }
+    ]).then((res) => {
+        let sql = `DELETE FROM roles WHERE ?`;
+        connection.query(sql, { id: res.roles }, (err, res) => {
+            if (err) throw err;
+            console.log('Role Has Been Deleted!');
+            optionsPrompt();
+        });
+    });
+}
+
 const addRole = () => {
-    let sql = `SELECT departments.id, roles.salary FROM employee 
-        JOIN roles ON employee.roles_id = roles.id 
-        JOIN departments ON departments.id = roles.departments_id
-        GROUP BY departments.id`
+    let sql = `SELECT departments.id, departments.department_name FROM departments
+        `
 
         connection.query(sql, (err, res) => {
             if (err) throw err;
-            const departments = res.map(({id, name}) => ({
+            const departments = res.map(({id, department_name}) => ({
                 value: id,
-                name: `${id} ${name}`
+                name: `${id} ${department_name}`
             }));
             console.log('Adding Role!');
             console.table(res);
@@ -332,18 +356,47 @@ const addDepartment = () => {
     });
 }
 
+const deleteDepartment = () => {
+    let sql = `SELECT departments.id, departments.department_name FROM departments`
+    connection.query(sql,(err, res) => {
+        if (err) throw err;
+        const  departments = res.map(({ id, department_name }) => ({
+            value: id,
+            name: `${id} ${department_name}`
+        }));
+        console.table(res);
+        departmentDelete(departments);
+    });
+}
+
+const departmentDelete = (departments) => {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departments',
+            message: 'Select department to be Deleted: ',
+            choices: departments
+        }
+    ]).then((res) => {
+        let sql = `DELETE FROM departments WHERE ?`;
+        connection.query(sql, { id: res.departments }, (err, res) => {
+            if (err) throw err;
+            console.log('Department Has Been Deleted!');
+            optionsPrompt();
+        });
+    });
+}
+
 const exit = () => {
         process.exit();
     }
 
-optionsPrompt();
 
 // Start server after DB connection
 connection.connect(err => {
   if (err) throw err;
   console.log('Database connected.');
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  optionsPrompt();
   });
-});
+
 
