@@ -85,7 +85,11 @@ const optionsPrompt = () => {
     };
 
 const viewAllEmployees = () => {
-    let sql = `SELECT * FROM employee ORDER BY last_name`;
+    let sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.is_manager AS manager, roles.title
+    FROM employee
+    JOIN roles ON employee.roles_id = roles.id
+    JOIN employee manager ON manager.id = employee.manager_id
+    `;
 
         connection.query(sql, (err, res) => {
             if (err) throw err;
@@ -107,7 +111,8 @@ const viewAllDepartments = () => {
         }
 
 const viewAllRoles = () => {
-    let sql = `SELECT * FROM roles ORDER BY salary DESC`;
+    let sql = `SELECT roles.title, roles.salary, departments_id AS departmentID , departments.department_name AS department FROM roles 
+    JOIN departments ON roles.departments_id = departments.id`;
     
         connection.query(sql, (err, res) => {
             if (err) throw err;
