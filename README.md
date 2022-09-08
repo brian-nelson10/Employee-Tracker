@@ -25,7 +25,7 @@ Prerequisites: [MySQL2](https://www.npmjs.com/package/mysql2) &amp; [Inquirer](h
 * run npm start!
 **See Usage for Tutorial!**
 
-**[Install Link](https://github.com/brian-nelson10/Team-Profile-Generator.git)**
+**[Install Link](https://github.com/brian-nelson10/Employee-Tracker.git)**
 
 # Usage
 
