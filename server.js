@@ -28,6 +28,7 @@ app.use((req, res) => {
   res.status(404).end();
 });
 
+// Initial Prompt Options
 const optionsPrompt = () => {
     console.log(`
     ====================
@@ -85,10 +86,9 @@ const optionsPrompt = () => {
     };
 
 const viewAllEmployees = () => {
-    let sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.is_manager AS manager, roles.title
+    let sql = `SELECT employee.id, employee.first_name, employee.last_name, employee.is_manager AS manager_status, roles.title
     FROM employee
     JOIN roles ON employee.roles_id = roles.id
-    JOIN employee manager ON manager.id = employee.manager_id
     `;
 
         connection.query(sql, (err, res) => {
